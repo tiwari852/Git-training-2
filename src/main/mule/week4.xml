@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d122c8d3-c89d-484f-a03d-92a700b0da55" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="week4Flow" doc:id="9a25cc93-a690-4f83-92a6-77b1b0fb8c8e" >
+		<http:listener doc:name="Listener" doc:id="a8b7fa82-df9a-4a56-bf2f-0f8366872f44" config-ref="HTTP_Listener_config" path="/logger" allowedMethods="POST">
+		</http:listener>
+		<ee:transform doc:name="generating the co..id" doc:id="3184985d-b44a-4a5f-baff-f909cb35cba4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id:uuid()
+
+	
+	}
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="uid" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-variable>
+				<ee:set-variable variableName="suid" ><![CDATA[%dw 2.0
+output application/java
+---
+
+	uuid()
+]]></ee:set-variable>
+				<ee:set-variable variableName="uid" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-variable value="#[vars.suid]" doc:name="accessing the generated id" doc:id="78a37916-7d6c-4e16-92bf-c269c7032663" variableName="ivar"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ab67a9bf-40c8-4b58-a6b7-eb22812453de" message="#[vars.ivar]"/>
+		<set-payload value='#[vars.ivar]' doc:name="Set Payload" doc:id="627c61b0-8210-4e28-baea-3a11af969e30" mimeType="application/json"/>
+	</flow>
+	<flow name="week4Flow1" doc:id="d374f643-7066-40e5-96a6-8bcad8d08ae2" >
+		<http:listener doc:name="Listener" doc:id="caa4c482-1d45-4c7c-aec6-cfd59635b8a4" config-ref="HTTP_Listener_config" path="/server" allowedMethods="GET,POST"/>
+		<set-payload value='#["id is-&gt;" ++ correlationId]' doc:name="Set Payload" doc:id="baa4b561-6482-4d1b-95c6-5eea42853c71" />
+		<logger level="INFO" doc:name="Logger" doc:id="9db21bf7-6159-41e5-bb49-ccf8606e32d3" message='#["correlation id is " ++ "-&gt;" ++ correlationId]'/>
+	</flow>
+</mule>
